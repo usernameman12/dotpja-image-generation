@@ -1,18 +1,25 @@
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const queryPrompt = url.searchParams.get("q") || "red, purple, blue cool s shaped logo, with a gray backsround.";
+
     const inputs = {
-      prompt: "cyberpunk cat",
+      prompt: queryPrompt,
     };
 
     const response = await env.AI.run(
       "@cf/stabilityai/stable-diffusion-xl-base-1.0",
-      inputs,
+      inputs
     );
 
-    return new Response(response, {
+    const imageData = response instanceof ArrayBuffer
+      ? new Uint8Array(response)
+      : response;
+
+    return new Response(imageData, {
       headers: {
-        "content-type": "image/png",
+        "Content-Type": "image/png",
       },
     });
   },
-} satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler;
